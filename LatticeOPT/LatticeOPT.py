@@ -2,6 +2,8 @@ from LatticeOPT_lib import *
 from InitialConditions import *
 import cProfile
 import time
+from file import output_dir
+
 
 ################################################################################################
 if PERIODIC and not EXCLUDE_BOUNDARY:
@@ -43,16 +45,16 @@ if not RESTART:
         thickness_dist[ExcSet, :] = Boundary_thickness
 
     # Save initial design
-    f = open('DesignIteration-1.npy', 'wb')
+    f = open(output_dir + 'DesignIteration-1.npy', 'wb')
     np.save(f, np.array([None, thickness, [thickness_dist]], dtype=object))
     f.close()
     print('Saved initial material distribution!')
 
-    f = open('OptLog_' + base_file_name + '.txt', 'w')
+    f = open(output_dir + 'OptLog_' + base_file_name + '.txt', 'w')
     f.close()
     Start_on_iter = 0
 else:
-    f = open('DesignIteration-1.npy', 'rb')
+    f = open(output_dir + 'DesignIteration-1.npy', 'rb')
     _, thickness, _ = np.load(f, allow_pickle=True)
     f.close()
 Target_sum_A = np.dot(np.multiply(thickness, wall_length), 1. - ExcSet) * target_ratio_of_initial_design
@@ -69,14 +71,14 @@ WriteBaseINP(base_file_name, DIM, Ns, WRITE_TIE)
 for itr in range(Start_on_iter, Start_on_iter + max_top_opt_iter):
     st = time.time()
     print(
-        '\n\n                                                         >>> Starting iteration ' + str(itr) + ' / ' + str(
+        '\n\n >>> Starting iteration ' + str(itr) + ' / ' + str(
             max_top_opt_iter))
 
     # Write new inp with section assigment
     jn = SectionAssignment(base_file_name, itr, Ns)
 
     # Run simulation and gather data from Abaqus
-    f = open('currItr', 'wb')
+    f = open(output_dir + 'currItr', 'wb')
     itr_dict = {'jn': jn,
                 'ncpu': ncpu,
                 'Ns': Ns,
@@ -110,6 +112,6 @@ for itr in range(Start_on_iter, Start_on_iter + max_top_opt_iter):
 # Final cleanup
 for i in range(1, 200):
     try:
-        os.remove('abaqus.rpy.' + str(i))
+        os.remove(output_dir + 'abaqus.rpy.' + str(i))
     except:
         pass

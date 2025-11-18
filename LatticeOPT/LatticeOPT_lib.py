@@ -2,6 +2,8 @@ import numpy as np
 import pickle
 import os
 
+from file import output_dir
+
 try:
     import matplotlib.pyplot as plt
     from matplotlib import cm
@@ -49,9 +51,9 @@ def PlotDesign(MatDist, itr):
     # plt.grid()
     # plt.show()
     if itr == -1:
-        plt.savefig('InitialCondition.png', dpi=600)
+        plt.savefig(output_dir + 'InitialCondition.png', dpi=600)
     else:
-        plt.savefig('DesignIteration' + str(itr) + '.pdf', dpi=600)
+        plt.savefig(output_dir + 'DesignIteration' + str(itr) + '.pdf', dpi=600)
     plt.close()
 
 
@@ -89,9 +91,9 @@ def PlotEdgeColor(s, cArry, threshold, itr, ExcSet):
 
     # Save figure
     if itr == -1:
-        plt.savefig('InitialCondition.png', dpi=600)
+        plt.savefig(output_dir + 'InitialCondition.png', dpi=600)
     else:
-        plt.savefig('ThicknessDesignIteration' + str(itr) + '.png', dpi=600)
+        plt.savefig(output_dir + 'ThicknessDesignIteration' + str(itr) + '.png', dpi=600)
     plt.close()
 
 
@@ -113,7 +115,7 @@ def WriteBaseINP(fn, DIM, Ns, WRITE_TIE):
     Z, Y, X = np.meshgrid(z, y, x, indexing='ij')
 
     # Step 2: Write an inp with BCs but no element sets for section assigment
-    f = open(fn + '_base.inp', 'w')
+    f = open(output_dir +fn + '_base.inp', 'w')
     # Write header
     f.write('*Heading\n*Preprint, echo=NO, model=NO, history=NO, contact=NO\n*Part, name=PART-1\n*Node\n')
     # Write nodes
@@ -246,7 +248,7 @@ def SectionAssignment(fn, itr, Ns):
     MatDist = np.ones([2, Ny + 1, Nx + 1], dtype=int)
 
     # Obtain updated design from last iteration
-    f = open('DesignIteration' + str(itr - 1) + '.npy', 'rb')
+    f = open(output_dir + 'DesignIteration' + str(itr - 1) + '.npy', 'rb')
     ph1, ph2, _ = np.load(f, allow_pickle=True)
     f.close()
     thickness_dist = _[0]
@@ -255,13 +257,13 @@ def SectionAssignment(fn, itr, Ns):
     Edge_sets, Shell_thickness = ElemSetFormDesign(MatDist, Ns, thickness_dist)
 
     # Read template
-    f = open(fn + '_base.inp', 'r')
+    f = open(output_dir +fn + '_base.inp', 'r')
     Lines = f.readlines()
     f.close()
 
     # Write new inp with section assignment
     written = False
-    f = open(fn + '_itr' + str(itr) + '.inp', 'w')
+    f = open(output_dir +fn + '_itr' + str(itr) + '.inp', 'w')
     for i in range(len(Lines)):
         l = Lines[i]
         if ('*End Part' in l) and not written:
