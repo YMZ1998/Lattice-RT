@@ -115,7 +115,7 @@ def WriteBaseINP(fn, DIM, Ns, WRITE_TIE):
     Z, Y, X = np.meshgrid(z, y, x, indexing='ij')
 
     # Step 2: Write an inp with BCs but no element sets for section assigment
-    f = open(output_dir +fn + '_base.inp', 'w')
+    f = open(output_dir + fn + '_base.inp', 'w')
     # Write header
     f.write('*Heading\n*Preprint, echo=NO, model=NO, history=NO, contact=NO\n*Part, name=PART-1\n*Node\n')
     # Write nodes
@@ -177,7 +177,7 @@ def WriteBaseINP(fn, DIM, Ns, WRITE_TIE):
     f.close()
 
     # Save break points
-    f = open('ElemBreakPt', 'wb')
+    f = open(output_dir + 'ElemBreakPt', 'wb')
     pickle.dump(ElementBreakPoints, f, protocol=2)
     f.close()
 
@@ -186,7 +186,7 @@ def WriteBaseINP(fn, DIM, Ns, WRITE_TIE):
 def ElemSetFormDesign(MatDist, Ns, thickness_dist):
     Nx, Ny, Nz, N_ele_per_edge = Ns
     # Read saved break points
-    f = open('ElemBreakPt', 'rb')
+    f = open(output_dir + 'ElemBreakPt', 'rb')
     ElementBreakPoints = pickle.load(f)
     f.close()
     N_elements = ElementBreakPoints[-1]
@@ -257,13 +257,13 @@ def SectionAssignment(fn, itr, Ns):
     Edge_sets, Shell_thickness = ElemSetFormDesign(MatDist, Ns, thickness_dist)
 
     # Read template
-    f = open(output_dir +fn + '_base.inp', 'r')
+    f = open(output_dir + fn + '_base.inp', 'r')
     Lines = f.readlines()
     f.close()
 
     # Write new inp with section assignment
     written = False
-    f = open(output_dir +fn + '_itr' + str(itr) + '.inp', 'w')
+    f = open(output_dir + fn + '_itr' + str(itr) + '.inp', 'w')
     for i in range(len(Lines)):
         l = Lines[i]
         if ('*End Part' in l) and not written:
@@ -680,13 +680,13 @@ def UpdateThickness(edge_energy, t_old, thickness_weight, wl, m_new, t_max, t_tr
 # Update design
 def DesignUpdate(itr, t_max, t_trheshold, max_dt, Objective_type):
     # Obtain updated design from last iteration
-    f = open('DesignIteration' + str(itr - 1) + '.npy', 'rb')
+    f = open(output_dir + 'DesignIteration' + str(itr - 1) + '.npy', 'rb')
     edge_energy_old, t_old, _ = np.load(f, allow_pickle=True)
     f.close()
     thickness_dist = _[0]
 
     # Get current iteration info
-    f = open('currItr', 'rb')
+    f = open(output_dir + 'currItr', 'rb')
     itr_dict = pickle.load(f)
     itr_dict['jn'] = str(itr_dict['jn']);
     itr_dict['base_file_name'] = str(itr_dict['base_file_name'])
@@ -696,7 +696,7 @@ def DesignUpdate(itr, t_max, t_trheshold, max_dt, Objective_type):
     wall_length = itr_dict['wall_length']  # Length of all lattice walls
 
     # Read in raw segment energies
-    f = open('Energies_' + itr_dict['jn'], 'rb')
+    f = open(output_dir + itr_dict['jn'] + '.npy', 'rb')
     curr_segment_energy, curr_segment_ese, curr_segment_epd, curr_segment_edmd, curr_edge_status = np.load(f)
     f.close()
     # Convert to edge energy, which is the sum of all segments in that edge

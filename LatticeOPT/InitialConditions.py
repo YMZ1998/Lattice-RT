@@ -1,6 +1,6 @@
 # Inputs:
 
-RESTART = False
+RESTART = True
 Start_on_iter = 0  # If RESTART = False , this is ignored
 
 # Unit cell size:
